@@ -15,7 +15,7 @@ desc: |
   也可以用 /体征 命令查看，/体征归零 重置。
 version: 1.0.0
 author: 蝶泳鲑鱼
-repo: ""
+repo: https://github.com/zihangzhang424-a11y/astrbot_plugin_bio_status
 astrbot_version: ">=4.14.0"
 tags:
   - 角色扮演
