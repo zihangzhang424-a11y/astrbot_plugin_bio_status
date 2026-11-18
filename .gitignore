@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+
+.vscode/
+.idea/
+*.json.tmp
+
+state.json
+
+_backup_publish_*/
+_junk_*/

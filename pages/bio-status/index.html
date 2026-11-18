@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>体征档案</title>
+<style>
+:root{
+  --bg0:#08060f; --bg1:#100a20; --line:#33215c; --line2:#4d2f8a;
+  --fg:#ece5ff; --dim:#9683c0; --faint:#624a92;
+  --purple:#a86dff; --pink:#ff6fd8; --cyan:#5fe8ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  min-height:100vh; font-size:13px; color:var(--fg); padding:16px;
+  font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  background:
+    radial-gradient(900px 600px at 15% -10%, rgba(168,109,255,.16), transparent 62%),
+    radial-gradient(760px 520px at 95% 115%, rgba(255,111,216,.12), transparent 62%),
+    linear-gradient(160deg,var(--bg0),var(--bg1));
+  background-attachment:fixed;
+}
+.shell{max-width:1180px;margin:0 auto;border:1px solid var(--line);border-radius:16px;
+  background:rgba(16,10,32,.72);backdrop-filter:blur(8px);overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 20px;
+  border-bottom:1px solid var(--line);background:linear-gradient(90deg,rgba(77,47,138,.4),transparent);}
+.topbar .heart{width:34px;height:34px;border-radius:9px;flex:none;display:flex;
+  align-items:center;justify-content:center;font-size:17px;
+  background:linear-gradient(135deg,var(--purple),var(--pink));
+  box-shadow:0 0 20px rgba(168,109,255,.55);animation:beat 3s ease-in-out infinite;}
+@keyframes beat{0%,100%{transform:scale(1);}45%{transform:scale(1.07);}}
+.title-block .t1{font-size:16px;letter-spacing:1px;}
+.title-block .t2{font-size:10px;color:var(--dim);letter-spacing:2px;margin-top:2px;}
+.motto{margin-left:auto;font-size:11px;color:var(--dim);text-align:right;max-width:290px;line-height:1.6;}
+
+.body{display:grid;grid-template-columns:150px minmax(420px,1fr) 320px;min-height:640px;}
+.side{border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:6px;}
+.side .item{padding:9px 12px;border-radius:9px;color:var(--dim);cursor:pointer;
+  font-size:12.5px;display:flex;align-items:center;gap:8px;transition:.2s;}
+.side .item:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--line2);}
+.side .item:hover{background:rgba(168,109,255,.08);}
+.side .item.active{background:linear-gradient(90deg,rgba(168,109,255,.28),rgba(168,109,255,.04));
+  color:#fff;border:1px solid var(--line2);}
+.side .item.active:before{background:var(--pink);box-shadow:0 0 8px var(--pink);}
+
+.mid{border-right:1px solid var(--line);min-height:640px;}
+.center{padding:16px;display:flex;flex-direction:column;gap:12px;}
+.panel{border:1px solid var(--line);border-radius:12px;
+  background:linear-gradient(180deg,rgba(30,20,56,.62),rgba(18,12,34,.62));overflow:hidden;}
+.panel-hd{padding:9px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--dim);}
+
+.stage{position:relative;height:540px;display:flex;align-items:center;justify-content:center;padding:8px 0;
+  background:radial-gradient(circle at 50% 50%, rgba(168,109,255,.13), transparent 66%);}
+.stage svg{width:100%;height:100%;max-width:760px;display:block;margin:0 auto;}
+
+.mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 14px 14px;}
+.mini{border:1px solid var(--line);border-radius:9px;padding:10px;text-align:center;
+  background:rgba(23,15,43,.85);transition:.3s;}
+.mini .h{font-size:11px;color:var(--dim);margin-bottom:6px;}
+.mini .v{font-size:14px;}
+.mini .v small{font-size:10px;color:var(--dim);}
+.mini.live{border-color:var(--line2);box-shadow:0 0 14px rgba(168,109,255,.22);}
+
+.params{display:grid;grid-template-columns:repeat(4,1fr);}
+.params .p{padding:14px;border-right:1px solid var(--line);}
+.params .p:last-child{border-right:none;}
+.params .h{font-size:11px;color:var(--dim);margin-bottom:8px;}
+.params .v{font-size:21px;font-weight:600;letter-spacing:.5px;}
+.params .v small{font-size:12px;color:var(--dim);font-weight:400;}
+.params .src{font-size:10px;color:var(--faint);margin-top:6px;}
+
+.right{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.rcard{border:1px solid var(--line);border-radius:12px;padding:14px;background:rgba(23,15,43,.8);}
+.rcard .h{font-size:12px;color:var(--dim);margin-bottom:10px;display:flex;justify-content:space-between;}
+.rcard .big{font-size:29px;font-weight:600;letter-spacing:1px;}
+.rcard .big small{font-size:13px;color:var(--dim);font-weight:400;}
+.rcard .pct{float:right;font-size:13px;color:var(--dim);margin-top:12px;}
+.rbar{height:8px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:10px;}
+.rbar > i{display:block;height:100%;width:0;border-radius:5px;transition:width .7s cubic-bezier(.2,.8,.2,1);
+  background:linear-gradient(90deg,var(--purple),var(--pink));box-shadow:0 0 12px rgba(255,111,216,.5);}
+.zones{margin-top:12px;display:flex;flex-direction:column;gap:1px;border-radius:8px;overflow:hidden;}
+.zone{display:flex;font-size:11px;padding:7px 10px;background:rgba(255,255,255,.03);color:var(--dim);transition:.3s;}
+.zone.on{background:linear-gradient(90deg,rgba(168,109,255,.32),rgba(255,111,216,.16));color:#fff;}
+.zone .n{width:18px;}
+.zone .r{margin-left:auto;}
+.empty{color:var(--faint);font-size:11.5px;line-height:1.8;}
+.feed{font-size:11.5px;max-height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+.feed div{display:flex;gap:8px;padding:6px 2px;border-bottom:1px dashed rgba(255,255,255,.05);color:var(--dim);}
+.feed .t{color:var(--faint);font-family:Consolas,monospace;}
+.feed .k{color:var(--pink);}
+.feed .tag{margin-left:auto;font-size:10px;color:var(--cyan);}
+.feed::-webkit-scrollbar{width:5px;}
+.feed::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px;}
+.legend{display:flex;gap:16px;justify-content:center;padding:8px;font-size:10.5px;color:var(--faint);}
+.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;}
+
+.pad-body{padding:16px;}
+.pad-body .panel{border:1px solid var(--line);border-radius:12px;
+  background:linear-gradient(180deg,rgba(30,20,56,.62),rgba(18,12,34,.62));overflow:hidden;}
+.logbox{padding:6px 14px 14px;max-height:620px;overflow-y:auto;}
+.logrow{display:flex;gap:12px;padding:9px 2px;border-bottom:1px dashed rgba(255,255,255,.05);
+  font-size:12px;color:var(--dim);}
+.logrow .t{color:var(--faint);font-family:Consolas,monospace;flex:none;}
+.logrow .k{color:var(--pink);flex:none;width:42px;}
+.logrow .d{color:var(--dim);}
+.logbox::-webkit-scrollbar{width:5px;}
+.logbox::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px;}
+
+.setting{padding:16px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;
+  align-items:center;gap:12px;}
+.setting .sh{font-size:12px;color:var(--dim);width:100%;}
+.setting input[type=range]{flex:1;min-width:200px;accent-color:var(--purple);cursor:pointer;}
+.btn{border:1px solid var(--line2);border-radius:8px;padding:8px 18px;font-size:12.5px;
+  background:linear-gradient(135deg,rgba(168,109,255,.35),rgba(255,111,216,.25));color:#fff;
+  cursor:pointer;font-family:inherit;transition:.2s;}
+.btn:hover{box-shadow:0 0 16px rgba(168,109,255,.5);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn.ghost{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--dim);}
+.btn.ghost:hover{color:#fff;border-color:var(--line2);box-shadow:0 0 12px rgba(168,109,255,.3);}
+.btns{display:flex;flex-wrap:wrap;gap:10px;}
+.msg{font-size:12px;color:var(--cyan);}
+@media(max-width:1200px){.body{grid-template-columns:140px minmax(360px,1fr) 290px;}}
+@media(max-width:980px){.body{grid-template-columns:140px 1fr;}
+  .right{grid-column:1/-1;border-top:1px solid var(--line);flex-direction:row;flex-wrap:wrap;}
+  .right .rcard{flex:1 1 210px;}}
+@media(max-width:720px){.body{grid-template-columns:1fr;}
+  .side{flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line);}
+  .mid{border-right:none;}}
+</style>
+</head>
+
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="heart" id="heart">♥</div>
+    <div class="title-block">
+      <div class="t1">体征档案</div>
+      <div class="t2">BIO-STATUS ARCHIVE</div>
+    </div>
+    <div class="motto">每轮对话都会带入当前读数，可在插件配置里调整全部数值与词表</div>
+  </div>
+
+  <div class="body" id="mainBody">
+    <div class="side">
+      <div class="item active" data-view="overview">状态总览</div>
+      <div class="item" data-view="events">事件日志</div>
+      <div class="item" data-view="settings">设置</div>
+    </div>
+
+    <!-- 中栏：总览 + 覆盖面板都在这个格子里，侧栏永远不会被盖住 -->
+    <div class="mid">
+      <div class="center" id="pane-overview">
+        <div class="panel">
+          <div class="stage">
+            <svg viewBox="0 0 460 320" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#c58bff" stop-opacity=".28"/>
+                <stop offset="62%" stop-color="#a86dff" stop-opacity=".08"/>
+                <stop offset="100%" stop-color="#a86dff" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#c99cf5" stop-opacity=".34"/>
+                <stop offset="55%"  stop-color="#8a5bd0" stop-opacity=".24"/>
+                <stop offset="100%" stop-color="#4f7fd8" stop-opacity=".20"/>
+              </linearGradient>
+              <linearGradient id="cav" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#ffe4fb" stop-opacity=".26"/>
+                <stop offset="100%" stop-color="#ff6fd8" stop-opacity=".12"/>
+              </linearGradient>
+              <linearGradient id="line" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity=".92"/>
+                <stop offset="55%"  stop-color="#d8a8ff" stop-opacity=".68"/>
+                <stop offset="100%" stop-color="#7fe3ff" stop-opacity=".60"/>
+              </linearGradient>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+
+              <!-- 柔光：大范围模糊，用来做体表浮光 -->
+              <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="9"/>
+              </filter>
+              <!-- 内发光：把描边挤到内侧 -->
+              <filter id="innerGlow" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="3.4" result="b"/>
+                <feComposite in="SourceGraphic" in2="b" operator="over"/>
+              </filter>
+
+              <!-- 体表渐变：加了第三层青，层次更厚 -->
+              <linearGradient id="fill2" x1="8%" y1="0%" x2="92%" y2="100%">
+                <stop offset="0%"   stop-color="#e6c6ff" stop-opacity=".44"/>
+                <stop offset="34%"  stop-color="#a86dff" stop-opacity=".30"/>
+                <stop offset="68%"  stop-color="#ff7fd4" stop-opacity=".22"/>
+                <stop offset="100%" stop-color="#4fd8f5" stop-opacity=".24"/>
+              </linearGradient>
+
+              <!-- 宫腔渐变：中心亮，边缘收 -->
+              <radialGradient id="cavGlow" cx="50%" cy="42%" r="62%">
+                <stop offset="0%"   stop-color="#fff2fd" stop-opacity=".46"/>
+                <stop offset="52%"  stop-color="#ff9ae6" stop-opacity=".26"/>
+                <stop offset="100%" stop-color="#a86dff" stop-opacity=".10"/>
+              </radialGradient>
+
+              <!-- 血流扫光 -->
+              <linearGradient id="sweep" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stop-color="#5fe8ff" stop-opacity="0"/>
+                <stop offset="42%"  stop-color="#ffffff" stop-opacity=".55"/>
+                <stop offset="58%"  stop-color="#ffb3f1" stop-opacity=".55"/>
+                <stop offset="100%" stop-color="#ff6fd8" stop-opacity="0"/>
+              </linearGradient>
+
+              <!-- 描边渐变：白→粉→青，一圈走完 -->
+              <linearGradient id="rim" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#ffffff" stop-opacity=".95"/>
+                <stop offset="30%"  stop-color="#ffc4f4" stop-opacity=".80"/>
+                <stop offset="62%"  stop-color="#b98bff" stop-opacity=".72"/>
+                <stop offset="100%" stop-color="#7fe3ff" stop-opacity=".85"/>
+              </linearGradient>
+
+              <!-- 宫体裁剪，扫光和纹路都限制在里面 -->
+              <clipPath id="bodyClip">
+                <path d="M230 58
+                         C 196 58, 170 64, 158 80
+                         C 148 94, 147 116, 154 140
+                         C 161 162, 173 180, 183 196
+                         C 190 206, 196 212, 199 216
+                         C 211 221, 249 221, 261 216
+                         C 264 212, 270 206, 277 196
+                         C 287 180, 299 162, 306 140
+                         C 313 116, 312 94, 302 80
+                         C 290 64, 264 58, 230 58 Z"/>
+              </clipPath>
+            </defs>
+
+            <circle cx="230" cy="172" r="152" fill="url(#halo)">
+              <animate attributeName="opacity" values=".65;1;.65" dur="4.6s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- ========== 输卵管：从宫角外伸，往下弯成伞部 ========== -->
+            <g fill="none" stroke-linecap="round">
+              <!-- 外柔光 -->
+              <path d="M150 104 C 126 94, 100 96, 86 110 C 72 124, 72 142, 82 154 C 88 161, 94 165, 99 168" stroke="#a86dff" stroke-width="12" opacity=".28" filter="url(#soft)"/>
+              <path d="M310 104 C 334 94, 360 96, 374 110 C 388 124, 388 142, 378 154 C 372 161, 366 165, 361 168" stroke="#a86dff" stroke-width="12" opacity=".28" filter="url(#soft)"/>
+              <!-- 主体 -->
+              <path d="M150 104 C 126 94, 100 96, 86 110 C 72 124, 72 142, 82 154 C 88 161, 94 165, 99 168" stroke="url(#rim)" stroke-width="6.5" opacity=".75"/>
+              <path d="M310 104 C 334 94, 360 96, 374 110 C 388 124, 388 142, 378 154 C 372 161, 366 165, 361 168" stroke="url(#rim)" stroke-width="6.5" opacity=".75"/>
+              <!-- 内高光 -->
+              <path d="M150 104 C 126 94, 100 96, 86 110 C 72 124, 72 142, 82 154 C 88 161, 94 165, 99 168" stroke="#fff0fd" stroke-width="2" opacity=".45"/>
+              <path d="M310 104 C 334 94, 360 96, 374 110 C 388 124, 388 142, 378 154 C 372 161, 366 165, 361 168" stroke="#fff0fd" stroke-width="2" opacity=".45"/>
+              <!-- 伞部：从峡部张开成漏斗，边缘正好扣住卵巢 -->
+              <path d="M99 168 C 95 172, 91 176, 88 180" stroke="#ffd6f7" stroke-width="1.8" opacity=".55"/>
+              <path d="M103 170 C 100 174, 97 178, 95 183" stroke="#ffd6f7" stroke-width="1.6" opacity=".45"/>
+              <path d="M95 164 C 90 166, 86 168, 82 171" stroke="#ffd6f7" stroke-width="1.4" opacity=".4"/>
+              <path d="M361 168 C 365 172, 369 176, 372 180" stroke="#ffd6f7" stroke-width="1.8" opacity=".55"/>
+              <path d="M357 170 C 360 174, 363 178, 365 183" stroke="#ffd6f7" stroke-width="1.6" opacity=".45"/>
+              <path d="M365 164 C 370 166, 374 168, 378 171" stroke="#ffd6f7" stroke-width="1.4" opacity=".4"/>
+            </g>
+
+            <!-- 卵巢：贴着伞部外侧下方，不高于宫角 -->
+            <ellipse cx="82" cy="176" rx="16" ry="19" fill="#ff8fe0" opacity=".22"
+                     filter="url(#soft)" transform="rotate(-12 82 176)"/>
+            <ellipse cx="378" cy="176" rx="16" ry="19" fill="#ff8fe0" opacity=".22"
+                     filter="url(#soft)" transform="rotate(12 378 176)"/>
+            <ellipse cx="82" cy="176" rx="16" ry="19" fill="url(#fill2)" stroke="url(#rim)" stroke-width="1.5"
+                     transform="rotate(-12 82 176)"/>
+            <ellipse cx="378" cy="176" rx="16" ry="19" fill="url(#fill2)" stroke="url(#rim)" stroke-width="1.5"
+                     transform="rotate(12 378 176)"/>
+            <path d="M70 168 C 66 174, 66 182, 70 188" fill="none" stroke="#ffffff"
+                  stroke-width="1.8" stroke-linecap="round" opacity=".40"
+                  transform="rotate(-12 82 176)"/>
+            <path d="M366 168 C 362 174, 362 182, 366 188" fill="none" stroke="#ffffff"
+                  stroke-width="1.8" stroke-linecap="round" opacity=".40"
+                  transform="rotate(12 378 176)"/>
+            <circle cx="76" cy="169" r="4.2" fill="#ffffff" opacity=".38"/>
+            <circle cx="372" cy="169" r="4.2" fill="#ffffff" opacity=".38"/>
+            <!-- 卵巢里的小卵泡 -->
+            <circle cx="86" cy="182" r="2.4" fill="#ffe4fb" opacity=".45"/>
+            <circle cx="78" cy="180" r="1.6" fill="#ffe4fb" opacity=".35"/>
+            <circle cx="382" cy="182" r="2.4" fill="#ffe4fb" opacity=".45"/>
+            <circle cx="374" cy="180" r="1.6" fill="#ffe4fb" opacity=".35"/>
+
+            <!-- ========== 子宫本体：宽扁倒三角 ==========
+                 高 150（gap 58→208），宽 170（145→315）
+            -->
+            <!-- 外圈柔光 -->
+            <path d="M230 58
+                     C 196 58, 170 64, 158 80
+                     C 148 94, 147 116, 154 140
+                     C 161 162, 173 180, 183 196
+                     C 190 206, 196 212, 199 216
+                     C 211 221, 249 221, 261 216
+                     C 264 212, 270 206, 277 196
+                     C 287 180, 299 162, 306 140
+                     C 313 116, 312 94, 302 80
+                     C 290 64, 264 58, 230 58 Z"
+                  fill="#a86dff" opacity=".34" filter="url(#soft)">
+              <animate attributeName="opacity" values=".28;.42;.28" dur="4.2s" repeatCount="indefinite"/>
+            </path>
+
+            <!-- 体表本体 -->
+            <path d="M230 58
+                     C 196 58, 170 64, 158 80
+                     C 148 94, 147 116, 154 140
+                     C 161 162, 173 180, 183 196
+                     C 190 206, 196 212, 199 216
+                     C 211 221, 249 221, 261 216
+                     C 264 212, 270 206, 277 196
+                     C 287 180, 299 162, 306 140
+                     C 313 116, 312 94, 302 80
+                     C 290 64, 264 58, 230 58 Z"
+                  fill="url(#fill2)" stroke="url(#rim)" stroke-width="2.4"
+                  filter="url(#innerGlow)"/>
+
+            <!-- 体表细纹（限制在宫体内） -->
+            <g clip-path="url(#bodyClip)" fill="none" stroke="#ffffff" stroke-linecap="round" opacity=".16">
+              <path d="M168 84 C 160 112, 162 148, 176 184" stroke-width="1"/>
+              <path d="M184 66 C 174 104, 176 152, 192 200" stroke-width=".9"/>
+              <path d="M264 66 C 258 104, 260 152, 268 200" stroke-width=".9"/>
+              <path d="M292 84 C 296 112, 294 148, 284 184" stroke-width="1"/>
+              <path d="M204 202 C 214 206, 246 206, 256 202" stroke-width=".8"
+                    stroke-dasharray="1 4"/>
+            </g>
+
+            <!-- 血流扫光 -->
+            <g clip-path="url(#bodyClip)">
+              <rect x="140" y="40" width="180" height="200" fill="url(#sweep)" opacity=".55">
+                <animate attributeName="y" values="30;220;30" dur="7.5s" repeatCount="indefinite"/>
+              </rect>
+            </g>
+
+            <!-- 宫腔：宽倒三角，随宫体一起压扁 -->
+            <path d="M230 88
+                     C 206 88, 188 94, 183 110
+                     C 178 130, 188 152, 198 172
+                     C 206 186, 214 196, 220 204
+                     C 224 208, 227 210, 230 211
+                     C 233 210, 236 208, 240 204
+                     C 246 196, 254 186, 262 172
+                     C 272 152, 282 130, 277 110
+                     C 272 94, 254 88, 230 88 Z"
+                  fill="url(#cavGlow)" stroke="none">
+              <animate attributeName="opacity" values=".82;1;.82" dur="3.6s" repeatCount="indefinite"/>
+            </path>
+            <!-- 宫腔边缘的细细一圈光 -->
+            <path d="M230 88
+                     C 206 88, 188 94, 183 110
+                     C 178 130, 188 152, 198 172
+                     C 206 186, 214 196, 220 204
+                     C 224 208, 227 210, 230 211
+                     C 233 210, 236 208, 240 204
+                     C 246 196, 254 186, 262 172
+                     C 272 152, 282 130, 277 110
+                     C 272 94, 254 88, 230 88 Z"
+                  fill="none" stroke="#fff0fd" stroke-width="1.2" opacity=".38"/>
+
+            <!-- 宫颈 -->
+            <path d="M199 218
+                     C 201 228, 203 238, 205 246
+                     C 207 252, 212 256, 217 257
+                     C 224 258, 236 258, 243 257
+                     C 248 256, 253 252, 255 246
+                     C 257 238, 259 228, 261 218"
+                  fill="#ff8fe0" opacity=".22" filter="url(#soft)"/>
+            <path d="M199 218
+                     C 201 228, 203 238, 205 246
+                     C 207 252, 212 256, 217 257
+                     C 224 258, 236 258, 243 257
+                     C 248 256, 253 252, 255 246
+                     C 257 238, 259 228, 261 218"
+                  fill="url(#fill2)" stroke="url(#rim)" stroke-width="1.9" opacity=".96"/>
+            <!-- 宫颈管的双线，带一点呼吸 -->
+            <path d="M219 222 C 219 234, 221 246, 223 254
+                     M241 222 C 241 234, 239 246, 237 254"
+                  fill="none" stroke="#ffe4fb" stroke-width="1.2" opacity=".5">
+              <animate attributeName="opacity" values=".35;.62;.35" dur="3.6s" repeatCount="indefinite"/>
+            </path>
+            <ellipse cx="230" cy="257" rx="9" ry="2.6" fill="#ffd6f7" opacity=".42"/>
+            <ellipse cx="230" cy="257" rx="9" ry="2.6" fill="none"
+                     stroke="#ffffff" stroke-width=".8" opacity=".35"/>
+
+            <!-- 宫角：两层，外柔内亮 -->
+            <path d="M158 80 C 166 90, 174 98, 184 104" fill="none"
+                  stroke="#ffc4f4" stroke-width="4.5" opacity=".2" stroke-linecap="round"
+                  filter="url(#glow)"/>
+            <path d="M302 80 C 294 90, 286 98, 276 104" fill="none"
+                  stroke="#ffc4f4" stroke-width="4.5" opacity=".2" stroke-linecap="round"
+                  filter="url(#glow)"/>
+            <path d="M158 80 C 166 90, 174 98, 184 104" fill="none"
+                  stroke="#ffffff" stroke-width="1.6" opacity=".48" stroke-linecap="round"/>
+            <path d="M302 80 C 294 90, 286 98, 276 104" fill="none"
+                  stroke="#ffffff" stroke-width="1.6" opacity=".48" stroke-linecap="round"/>
+
+            <!-- 左侧高光 -->
+            <path d="M172 78 C 158 102, 162 140, 176 172" fill="none"
+                  stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" opacity=".22" filter="url(#glow)"/>
+            <path d="M172 78 C 158 102, 162 140, 176 172" fill="none"
+                  stroke="#ffffff" stroke-width="1.1" stroke-linecap="round" opacity=".34"/>
+
+            <!-- 宫底的柔亮 -->
+            <path d="M186 66 C 210 60, 250 60, 274 66" fill="none"
+                  stroke="#ffe4fb" stroke-width="2.2" stroke-linecap="round" opacity=".30"
+                  filter="url(#glow)"/>
+
+            <!-- 心跳：核心光点 + 两圈扩散波 -->
+            <circle cx="230" cy="152" r="5" fill="#fff4fe" filter="url(#glow)">
+              <animate attributeName="opacity" values=".55;1;.55" dur="3.2s" repeatCount="indefinite"/>
+              <animate attributeName="r" values="4;6.5;4" dur="3.2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="230" cy="152" r="6" fill="none" stroke="#ffd6f7" stroke-width="1.2" opacity=".1">
+              <animate attributeName="r" values="6;34" dur="3.2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values=".45;0" dur="3.2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="230" cy="152" r="6" fill="none" stroke="#7fe3ff" stroke-width="1" opacity=".1">
+              <animate attributeName="r" values="6;46" dur="4.6s" begin="1.2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values=".32;0" dur="4.6s" begin="1.2s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+          </div>
+          <div class="mini-grid">
+            <div class="mini"><div class="h">当前档位</div><div class="v" id="mStage">--</div></div>
+            <div class="mini"><div class="h">当前温度</div><div class="v" id="mTemp">--</div></div>
+            <div class="mini live"><div class="h">储存层</div><div class="v" id="mStore">0<small>%</small></div></div>
+            <div class="mini"><div class="h">当前状态</div><div class="v" id="mInsert">--</div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd">核心状态参数</div>
+          <div class="params">
+            <div class="p"><div class="h">距上次满足</div><div class="v" id="pSince">--:--</div></div>
+            <div class="p"><div class="h">自然吸收效率</div><div class="v" id="pAbsorb">4</div></div>
+            <div class="p"><div class="h">当前热度</div><div class="v" id="pTemp">0</div></div>
+            <div class="p"><div class="h">维持时间</div><div class="v" id="pHold">--:--</div></div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span><i style="background:#3d2b6b"></i>深空蓝</span>
+          <span><i style="background:#a86dff"></i>紫罗兰</span>
+          <span><i style="background:#ff6fd8"></i>品红</span>
+          <span><i style="background:#5fe8ff"></i>青色</span>
+        </div>
+      </div>
+
+      <div class="center" id="pane-events" style="display:none;">
+        <div class="panel">
+          <div class="panel-hd">完整事件记录 <span id="logCount" style="float:right;">0 条</span></div>
+          <div class="logbox" id="logList"></div>
+        </div>
+      </div>
+
+      <div class="center" id="pane-settings" style="display:none;">
+        <div class="panel">
+          <div class="panel-hd">手动调整</div>
+          <div class="setting">
+            <div class="sh">欲望值 <span id="setDesireVal">30</span> / 100</div>
+            <input type="range" id="setDesire" min="0" max="100" step="1" value="30">
+            <button class="btn" id="btnSetDesire">应用</button>
+          </div>
+          <div class="setting">
+            <div class="sh">残留操作</div>
+            <div class="btns">
+              <button class="btn" data-action="add_residue">注入一次</button>
+              <button class="btn" data-action="fill_residue">填满</button>
+              <button class="btn ghost" data-action="clear_residue">清空</button>
+            </div>
+          </div>
+          <div class="setting">
+            <div class="sh">快捷操作</div>
+            <div class="btns">
+              <button class="btn ghost" data-action="satisfy">记为满足</button>
+              <button class="btn ghost" data-action="set_stage">回到常态</button>
+              <button class="btn ghost" data-action="reset">全部归零</button>
+            </div>
+          </div>
+          <div class="setting" style="border-bottom:none;">
+            <div class="sh">状态</div>
+            <div class="msg" id="setMsg">等待操作</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右栏：状态卡片 -->
+    <div class="right">
+      <div class="rcard">
+        <div class="h"><span id="rResTitle">残留量</span><span>residue</span></div>
+        <div>
+          <span class="big"><span id="rRes">0</span><small> / <span id="rCap">200</span></small></span>
+          <span class="pct" id="rPct">0%</span>
+        </div>
+        <div class="rbar"><i id="rBar"></i></div>
+        <div class="zones" id="zones">
+          <div class="zone"><span class="n">1</span>低区<span class="r">0-25%</span></div>
+          <div class="zone"><span class="n">2</span>平稳区<span class="r">25-55%</span></div>
+          <div class="zone"><span class="n">3</span>充能区<span class="r">55-85%</span></div>
+          <div class="zone"><span class="n">4</span>临界区<span class="r">85-100%</span></div>
+        </div>
+      </div>
+
+      <div class="rcard">
+        <div class="h"><span>核心能量</span><span>热度</span></div>
+        <div>
+          <span class="big"><span id="coreVal">0.0</span><small> %</small></span>
+        </div>
+        <div class="rbar"><i id="coreBar"></i></div>
+        <div style="margin-top:10px;font-size:10.5px;color:var(--faint);" id="coreSrc">—</div>
+      </div>
+
+      <div class="rcard">
+        <div class="h"><span>欲望值</span><span id="rStage">--</span></div>
+        <div>
+          <span class="big"><span id="rDesire">0</span><small> / 100</small></span>
+          <span class="pct" id="rDesirePct">0%</span>
+        </div>
+        <div class="rbar"><i id="rDesireBar"></i></div>
+        <div style="margin-top:10px;font-size:10.5px;color:var(--faint);display:flex;justify-content:space-between;">
+          <span>数据源 本地状态机</span><span>需求 <span id="rNeed">0</span> / 20</span>
+        </div>
+      </div>
+
+      <div class="rcard">
+        <div class="h"><span>近期事件</span><span id="feedState">●</span></div>
+        <div class="feed" id="feed"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

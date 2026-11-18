@@ -1,0 +1,138 @@
+{
+  "tickMs": {
+    "description": "后台推进间隔（毫秒）",
+    "type": "int",
+    "default": 3000
+  },
+  "capacity": {
+    "description": "残留容量上限",
+    "type": "int",
+    "default": 200
+  },
+  "absorbPerHour": {
+    "description": "每小时自然吸收格数",
+    "type": "float",
+    "default": 4
+  },
+  "injectAmount": {
+    "description": "单次注入格数",
+    "type": "int",
+    "default": 12
+  },
+  "desireNormal": {
+    "description": "normal 档欲望值",
+    "type": "int",
+    "default": 30
+  },
+  "desireMild": {
+    "description": "mild 档欲望值",
+    "type": "int",
+    "default": 50
+  },
+  "desireFull": {
+    "description": "full 档欲望值",
+    "type": "int",
+    "default": 90
+  },
+  "desirePounce": {
+    "description": "pounce 档欲望值",
+    "type": "int",
+    "default": 100
+  },
+  "tempBase": {
+    "description": "基础温度",
+    "type": "float",
+    "default": 37.2
+  },
+  "tempRise": {
+    "description": "欲望满时的温度增量",
+    "type": "float",
+    "default": 3.3
+  },
+  "stageDecaySec": {
+    "description": "无信号多久降一档（秒）",
+    "type": "int",
+    "default": 180
+  },
+  "thrustHoldSec": {
+    "description": "运动状态保持时长（秒）",
+    "type": "int",
+    "default": 20
+  },
+  "outHoldSec": {
+    "description": "已退出状态保持时长（秒）",
+    "type": "int",
+    "default": 30
+  },
+  "heatWords": {
+    "description": "轻度信号关键词（命中即升温）",
+    "type": "list",
+    "default": ["亲密", "靠近", "心动", "想你", "脸红", "抱", "贴", "亲近"]
+  },
+  "pounceWords": {
+    "description": "强信号关键词（命中即拉到最高档）",
+    "type": "list",
+    "default": ["扑上来", "扑倒", "忍不住了"]
+  },
+  "injectWords": {
+    "description": "注入关键词（命中则增加残留量）",
+    "type": "list",
+    "default": ["灌", "注入", "填满", "装不下"]
+  },
+  "penWords": {
+    "description": "进入关键词（命中则状态转为运动中）",
+    "type": "list",
+    "default": ["进来了", "深入", "没入"]
+  },
+  "exitWords": {
+    "description": "退出关键词（命中则状态转为已退出）",
+    "type": "list",
+    "default": ["退出", "结束", "停下"]
+  },
+  "satisfiedWords": {
+    "description": "满足关键词（命中则清空锁定并回落到常态）",
+    "type": "list",
+    "default": ["满足了", "够了", "舒服"]
+  },
+  "stageLabels": {
+    "description": "档位显示名。键固定为 normal/mild/full/pounce，只改值",
+    "type": "dict",
+    "default": {
+      "normal": "平静",
+      "mild": "微热",
+      "full": "高涨",
+      "pounce": "难耐"
+    }
+  },
+  "stateLabels": {
+    "description": "状态显示名。键固定为 none/moving/inserted/pulled，只改值",
+    "type": "dict",
+    "default": {
+      "none": "无",
+      "moving": "抽动中",
+      "inserted": "在位",
+      "pulled": "已退出"
+    }
+  },
+  "promptHint": {
+    "description": "注入到每轮对话末尾的提示语（跟在读数后面）",
+    "type": "text",
+    "default": "按上面这组读数决定你说话的分寸，不要自己报数字。"
+  },
+  "theme": {
+    "description": "页面与图表配色",
+    "type": "dict",
+    "default": {
+      "bg0": "#08060f",
+      "bg1": "#100a20",
+      "line": "#33215c",
+      "line2": "#4d2f8a",
+      "fg": "#ece5ff",
+      "dim": "#9683c0",
+      "faint": "#624a92",
+      "accent": "#a86dff",
+      "accent2": "#ff6fd8",
+      "accent3": "#5fe8ff"
+    }
+  }
+}
